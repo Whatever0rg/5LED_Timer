@@ -75,15 +75,16 @@ void loop() {
 
   switch ((buttonPresses%2)) {
   case 0:
-    dimdisplay(*displayState, dimmer);
+    dimdisplay(displayState, dimmer);
     break;
   
   case 1:
-    countdisplay(*displayState, counter);
+    countdisplay(displayState, counter);
     break;
   }
 
-  for (int i = 0; i < 5; i++) {
+
+    for (int i = 0; i < 5; i++) {
         Serial.print(displayState[i]);
         Serial.print(" ");
     }
