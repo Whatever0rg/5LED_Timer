@@ -2,49 +2,26 @@
 #include "display.h"
 #include "config.h"
 
-
-void display(int LEDcase) {
-  switch (LEDcase)
-  {
-    case 0:
-      analogWrite(LED1, 0);
-      analogWrite(LED2, 0);
-      analogWrite(LED3, 0);
-      analogWrite(LED4, 0);
-      analogWrite(LED5, BRIGHTNESS);
-      break;
-
-    case 1:
-      analogWrite(LED1, 0);
-      analogWrite(LED2, 0);
-      analogWrite(LED3, 0);
-      analogWrite(LED4, BRIGHTNESS);
-      analogWrite(LED5, BRIGHTNESS);
-      break;
-
-    case 2:
-      analogWrite(LED1, 0);
-      analogWrite(LED2, 0);
-      analogWrite(LED3, BRIGHTNESS);
-      analogWrite(LED4, BRIGHTNESS);
-      analogWrite(LED5, BRIGHTNESS);
-      break;
-
-    case 3:
-      analogWrite(LED1, 0);
-      analogWrite(LED2, BRIGHTNESS);
-      analogWrite(LED3, BRIGHTNESS);
-      analogWrite(LED4, BRIGHTNESS);
-      analogWrite(LED5, BRIGHTNESS);
-      break;
-
-    case 4:
-      analogWrite(LED1, BRIGHTNESS);
-      analogWrite(LED2, BRIGHTNESS);
-      analogWrite(LED3, BRIGHTNESS);
-      analogWrite(LED4, BRIGHTNESS);
-      analogWrite(LED5, BRIGHTNESS);
-      break;
+void countdisplay(int *ptr_display[5], int counter){
+  int mod = counter % 5;
+  for(int i = 0; i < mod; i++){
+    ptr_display[i] = BRIGHTNESS;
   }
-  //Serial.println("display called!!");
+  Serial.println("Counter");
+}
+
+void dimdisplay(int *ptr_display[5], int dimmer){
+  for(int i = 0; i < 5; i++){
+    ptr_display[i] = dimmer;
+  }
+  Serial.println("Dimmer");
+}
+
+void updatedisplay(int ledBrightness[5]){
+  Serial.print("Update");
+  analogWrite(LED1, ledBrightness[0]);
+  analogWrite(LED2, ledBrightness[1]);
+  analogWrite(LED3, ledBrightness[2]);
+  analogWrite(LED4, ledBrightness[3]);
+  analogWrite(LED5, ledBrightness[4]);
 }
