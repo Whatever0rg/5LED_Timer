@@ -3,6 +3,13 @@
 
 #define BRIGHTNESS_EEPROM 0
 
+// Rotary Encoder Inputs
+#define CLK 2
+#define DT 3
+#define SW 4
+#define DIMMER_STEPS 5
+#define DOUBLE_PRESS_DELAY 300
+
 constexpr int LED1 = 5;
 constexpr int LED2 = 6;
 constexpr int LED3 = 9;

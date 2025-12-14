@@ -3,12 +3,12 @@
 #include "config.h"
 
 void countdisplay(int *ptr_display, int counter, int dimmer){
-  int mod = counter % 5;
+  int mod = (counter-1) % 5;
   for(int i = 0; i < 5; i++){
-    if ((i+1) > mod){
-      ptr_display[i] = dimmer;
-    } else{
+    if ((i) > mod){
       ptr_display[i] = 0;
+    } else{
+      ptr_display[i] = dimmer;
     }
   }
   Serial.println("Counter");

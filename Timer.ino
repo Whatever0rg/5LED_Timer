@@ -1,26 +1,21 @@
 #include "src/config.h"
 #include "src/display.h"
+#include "src/encoder.h"
+#include "src/countdown.h"
 #include <EEPROM.h>
-
-// Rotary Encoder Inputs
-#define CLK 2
-#define DT 3
-#define SW 4
-#define DIMMER_STEPS 5
-
-
-
 
 int counter;
 int lastCounter;
 int dimmer;
 int lastDimmer;
-int currentStateCLK, lastStateCLK;
-String currentDir = "";
 unsigned long lastButtonPress = 0;
 int buttonPresses = 0;
 int displayState[5]={0,0,0,0,0};
-int hasSaved;
+bool hasSaved = false;
+int buttonMode = 0;
+bool lastBtnState = HIGH;
+bool timerStart = false;
+unsigned long startTime, time, turnOffInterval;
 
 void setup() {
   // Setup Serial Monitor
@@ -49,60 +44,70 @@ void setup() {
   pinMode(LED5, OUTPUT);
   
 
-  // Read the initial state of CLK
-  lastStateCLK = digitalRead(CLK);
-
   // Turn on Display
   dimdisplay(displayState, dimmer);
 }
 
-int readRotary(int rotation, int stepSize){
-  currentStateCLK = digitalRead(CLK);
-  if (currentStateCLK != lastStateCLK && currentStateCLK == 1){
-    if (digitalRead(DT) != currentStateCLK){
-      rotation += stepSize;
-      Serial.println(rotation);
-    } else {
-      rotation -= stepSize;
-      Serial.println(rotation);
-    }
-  }
-  return rotation;
-}
 
 void loop() {
   lastDimmer = dimmer;
   lastCounter = counter;
   
 
-  // Remember last CLK state
-  lastStateCLK = currentStateCLK;
-
   // Read the button state
-  int btnState = digitalRead(SW);
+  bool btnState = digitalRead(SW);
 
-  if (btnState == LOW) {
-    if (millis() - lastButtonPress > 50){ //button is pressed
-      Serial.println("Press!!");
-      buttonPresses += 1;
-      counter = 0;
-      hasSaved = 0;
-    }
-    lastButtonPress = millis();
+if (btnState == LOW && lastBtnState == HIGH) {
+  // button was JUST pressed
+  unsigned long now = millis();
+
+  if (now - lastButtonPress < DOUBLE_PRESS_DELAY) {
+    Serial.println("Double");
+    buttonMode = 2;
+    hasSaved = false;
+  } else {
+    Serial.println("Single");
+    buttonMode = (buttonMode == 0) ? 1 : 0;
   }
 
+  lastButtonPress = now;
+}
 
-  if((buttonPresses % 2) == 1 && hasSaved == 0){
-    EEPROM.update(BRIGHTNESS_EEPROM, dimmer);
-    Serial.println("Saved to EEPROM");
-    Serial.println(EEPROM.read(BRIGHTNESS_EEPROM));
-    hasSaved = 1;
-  }
+lastBtnState = btnState;
 
 
-  switch ((buttonPresses%2)) {
+  switch(buttonMode){
   case 0:
-    dimmer = readRotary(dimmer,DIMMER_STEPS);
+    if (not timerStart){
+      timerStart = true;
+    }
+    
+    readRotary(counter, 1, &counter);
+    if(counter < 1){
+      counter = 1;
+    }
+    if(lastCounter!= counter){
+      countdisplay(displayState, counter, dimmer);
+    }
+    if((buttonPresses % 2) == 0 && hasSaved == 0){
+      EEPROM.update(BRIGHTNESS_EEPROM, dimmer);
+      Serial.println("Saved to EEPROM");
+      Serial.println(EEPROM.read(BRIGHTNESS_EEPROM));
+      hasSaved = true;
+    }
+    break;
+  
+  case 1:
+    if(timerStart){
+    startTime = millis();
+    countdownsetup(counter, displayState, dimmer, &time, &turnOffInterval);
+    timerStart = false;
+    }
+    countdownincrement(time, turnOffInterval, startTime, displayState, dimmer);
+    break;
+
+  case 2:
+    readRotary(dimmer, DIMMER_STEPS, &dimmer);
 
     if(dimmer < 0){
       dimmer = 0;
@@ -114,15 +119,6 @@ void loop() {
     if(lastDimmer != dimmer){
       dimdisplay(displayState, dimmer);
     }
-    break;
-  
-  case 1:
-    counter = readRotary(counter, 1);
-
-    if(lastCounter!= counter){
-      countdisplay(displayState, counter, dimmer);
-    }
-
     break;
   }
 /*
