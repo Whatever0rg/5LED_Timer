@@ -34,10 +34,13 @@
     <img src="images/logo.png" alt="Logo" width=75% height=75%>
   </a>
 
-<h3 align="center">AetherUnit</h3>
+<h3 align="center">5_LED-TIMER</h3>
 
   <p align="center">
-    project_description
+    Time is worthless
+    unless given purpose
+    so create your worth
+    - Bennet H.
     <br />
     <a href="https://github.com/Whatever0rg/5LED_Timer"><strong>Explore the docs »</strong></a>
     <br />
